@@ -34,7 +34,7 @@ services:
       DB_NAME: userdb
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-change-me-interview-platform-secret-key-32bytes!}
     ports:
       - "8081:8081"
     networks: [interview-net]
@@ -120,7 +120,7 @@ services:
       RESUME_SERVICE_URL: http://resume-service:8082
       INTERVIEW_SERVICE_URL: http://interview-service:8083
       FEEDBACK_SERVICE_URL: http://feedback-service:8084
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-change-me-interview-platform-secret-key-32bytes!}
     ports:
       - "8080:8080"
     networks: [interview-net]

@@ -19,7 +19,11 @@ export default function Login() {
       }))
       navigate(data.role === 'ADMIN' ? '/admin' : '/interviewer')
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid username or password')
+      if (err.response) {
+        setError(err.response.data?.message || 'Invalid username or password')
+      } else {
+        setError('Cannot reach the server (network/proxy issue) — check that the backend is running.')
+      }
     }
   }
 

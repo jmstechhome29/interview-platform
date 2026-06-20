@@ -1,6 +1,12 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+// Empty base URL = relative requests against whatever host/port the page was
+// loaded from (e.g. http://<server-ip>:3000/api/...). Nginx (see nginx.conf)
+// proxies /api/* to the api-gateway container on the Docker network, so this
+// works the same on localhost, an EC2 public IP, or behind a real domain —
+// no rebuild needed per environment. Override with VITE_API_BASE_URL only if
+// you need to point the frontend at a gateway running somewhere else entirely.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
 
 const api = axios.create({ baseURL: API_BASE_URL })
 
@@ -15,7 +21,8 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    const isLoginRequest = error.config?.url?.includes('/api/auth/login')
+    if (error.response && error.response.status === 401 && !isLoginRequest) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       window.location.href = '/login'
