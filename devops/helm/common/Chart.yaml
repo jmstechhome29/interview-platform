@@ -1,0 +1,5 @@
+apiVersion: v2
+name: common
+description: "Shared Helm library chart - holds one copy of Deployment/Service/HPA/Ingress templates that every microservice chart reuses, so service charts only override image/port/env in their own values.yaml."
+type: library
+version: 1.0.0

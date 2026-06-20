@@ -1,0 +1,26 @@
+# Example environment override file (dev/staging would look similar with
+# smaller numbers). Only the fields that differ from each subchart's base
+# values.yaml need to be listed here - this is the "minimal override" pattern.
+
+user-service:
+  image: { tag: "1.4.2" }
+  hpa: { minReplicas: 3, maxReplicas: 10 }
+
+resume-service:
+  image: { tag: "1.4.2" }
+  hpa: { minReplicas: 3, maxReplicas: 10 }
+
+interview-service:
+  image: { tag: "1.4.2" }
+  hpa: { minReplicas: 3, maxReplicas: 12 }
+
+feedback-service:
+  image: { tag: "1.4.2" }
+
+api-gateway:
+  image: { tag: "1.4.2" }
+  ingress: { host: "api.interview-platform.com" }
+
+frontend:
+  image: { tag: "1.4.2" }
+  ingress: { host: "interview-platform.com" }

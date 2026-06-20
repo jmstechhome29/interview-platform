@@ -1,0 +1,15 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: interview-platform
+  namespace: argocd
+spec:
+  description: Interview Scheduling Platform
+  sourceRepos:
+    - "https://github.com/<your-org>/interview-platform.git"
+  destinations:
+    - namespace: interview-platform
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"

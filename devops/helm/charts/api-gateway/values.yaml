@@ -1,0 +1,42 @@
+image:
+  repository: 123456789012.dkr.ecr.us-east-1.amazonaws.com/interview-platform/api-gateway
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+containerPort: 8080
+
+resources:
+  requests: { cpu: 150m, memory: 256Mi }
+  limits:   { cpu: 750m, memory: 512Mi }
+
+probes:
+  enabled: true
+  livenessPath: /actuator/health
+  readinessPath: /actuator/health
+  initialDelaySeconds: 20
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilization: 60
+
+ingress:
+  enabled: true
+  host: api.interview-platform.example.com
+  path: /
+
+vault:
+  enabled: false
+  irsaRoleArn: ""
+
+secretEnabled: true
+secrets:
+  JWT_SECRET: "changeme-use-vault-or-sealed-secrets"
+
+config:
+  USER_SERVICE_URL: "http://user-service:8081"
+  RESUME_SERVICE_URL: "http://resume-service:8082"
+  INTERVIEW_SERVICE_URL: "http://interview-service:8083"
+  FEEDBACK_SERVICE_URL: "http://feedback-service:8084"

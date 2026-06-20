@@ -1,0 +1,37 @@
+image:
+  repository: 123456789012.dkr.ecr.us-east-1.amazonaws.com/interview-platform/frontend
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+containerPort: 80
+
+resources:
+  requests: { cpu: 50m, memory: 64Mi }
+  limits:   { cpu: 250m, memory: 128Mi }
+
+probes:
+  enabled: true
+  livenessPath: /
+  readinessPath: /
+  initialDelaySeconds: 10
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 4
+  targetCPUUtilization: 70
+
+ingress:
+  enabled: true
+  host: interview-platform.example.com
+  path: /
+
+vault:
+  enabled: false
+
+secretEnabled: false
+secrets: {}
+
+config:
+  VITE_API_BASE_URL: "https://api.interview-platform.example.com"

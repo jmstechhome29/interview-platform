@@ -1,0 +1,42 @@
+image:
+  repository: 123456789012.dkr.ecr.us-east-1.amazonaws.com/interview-platform/interview-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+containerPort: 8083
+
+resources:
+  requests: { cpu: 100m, memory: 256Mi }
+  limits:   { cpu: 500m, memory: 512Mi }
+
+probes:
+  enabled: true
+  livenessPath: /actuator/health/liveness
+  readinessPath: /actuator/health/readiness
+  initialDelaySeconds: 30
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 8
+  targetCPUUtilization: 65
+
+ingress:
+  enabled: false
+
+vault:
+  enabled: false
+  irsaRoleArn: ""
+
+secretEnabled: true
+secrets:
+  DB_PASSWORD: "changeme-use-vault-or-sealed-secrets"
+
+config:
+  DB_HOST: "postgres-interviewdb"
+  DB_PORT: "5432"
+  DB_NAME: "interviewdb"
+  DB_USER: "postgres"
+  RESUME_SERVICE_URL: "http://resume-service:8082"
+  USER_SERVICE_URL: "http://user-service:8081"

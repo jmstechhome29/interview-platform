@@ -1,0 +1,76 @@
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: #f4f6f9;
+  color: #1f2937;
+}
+.app-shell { min-height: 100vh; display: flex; flex-direction: column; }
+.navbar {
+  background: #1e3a8a;
+  color: white;
+  padding: 14px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.navbar h1 { font-size: 18px; margin: 0; }
+.navbar button {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.container { max-width: 1100px; margin: 0 auto; padding: 24px; width: 100%; }
+.card {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.card h2 { margin-top: 0; font-size: 18px; color: #1e3a8a; }
+table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+th, td { text-align: left; padding: 10px; border-bottom: 1px solid #e5e7eb; font-size: 14px; }
+th { background: #f1f5f9; }
+form .field { margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px; }
+label { font-size: 13px; font-weight: 600; color: #374151; }
+input, select, textarea {
+  padding: 9px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+}
+button.primary {
+  background: #1e3a8a;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+button.primary:hover { background: #1e40af; }
+.badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.badge.SCHEDULED { background: #fef3c7; color: #92400e; }
+.badge.COMPLETED { background: #d1fae5; color: #065f46; }
+.badge.CANCELLED { background: #fee2e2; color: #991b1b; }
+.login-wrap {
+  display: flex; align-items: center; justify-content: center; min-height: 100vh;
+}
+.login-box {
+  background: white; padding: 36px; border-radius: 12px; width: 360px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.login-box h1 { text-align: center; color: #1e3a8a; font-size: 22px; }
+.hint { font-size: 12px; color: #6b7280; margin-top: 14px; text-align: center; }
+.error { color: #b91c1c; font-size: 13px; margin-top: 8px; }
+.tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.tabs button {
+  padding: 8px 16px; border-radius: 6px; border: 1px solid #d1d5db;
+  background: white; cursor: pointer; font-size: 14px;
+}
+.tabs button.active { background: #1e3a8a; color: white; border-color: #1e3a8a; }
+.empty { color: #6b7280; font-size: 14px; padding: 12px 0; }

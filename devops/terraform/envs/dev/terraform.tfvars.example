@@ -1,0 +1,2 @@
+aws_region                    = "us-east-1"
+jenkins_trusted_principal_arn = "arn:aws:iam::123456789012:role/jenkins-ci-role"

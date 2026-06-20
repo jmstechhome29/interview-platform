@@ -1,0 +1,41 @@
+image:
+  repository: 123456789012.dkr.ecr.us-east-1.amazonaws.com/interview-platform/feedback-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+containerPort: 8084
+
+resources:
+  requests: { cpu: 100m, memory: 256Mi }
+  limits:   { cpu: 500m, memory: 512Mi }
+
+probes:
+  enabled: true
+  livenessPath: /actuator/health/liveness
+  readinessPath: /actuator/health/readiness
+  initialDelaySeconds: 30
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilization: 70
+
+ingress:
+  enabled: false
+
+vault:
+  enabled: false
+  irsaRoleArn: ""
+
+secretEnabled: true
+secrets:
+  DB_PASSWORD: "changeme-use-vault-or-sealed-secrets"
+
+config:
+  DB_HOST: "postgres-feedbackdb"
+  DB_PORT: "5432"
+  DB_NAME: "feedbackdb"
+  DB_USER: "postgres"
+  INTERVIEW_SERVICE_URL: "http://interview-service:8083"

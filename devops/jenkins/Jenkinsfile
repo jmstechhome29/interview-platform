@@ -1,0 +1,134 @@
+@Library('interview-platform-shared-lib') _
+
+// Declarative pipeline for ONE microservice. In a multibranch / seed-job setup
+// this same Jenkinsfile lives in each service folder; SERVICE_NAME is injected
+// by the seed job (see ../seed-job/seed.groovy) or set as a parameter.
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'SERVICE_NAME', defaultValue: 'user-service', description: 'Microservice folder to build')
+        string(name: 'IMAGE_TAG', defaultValue: "${env.BUILD_NUMBER}", description: 'Docker image tag')
+    }
+
+    environment {
+        ECR_REGISTRY   = "123456789012.dkr.ecr.us-east-1.amazonaws.com"
+        NEXUS_URL      = "http://nexus.internal:8081/repository/maven-releases"
+        SONAR_HOST_URL = "http://sonarqube.internal:9000"
+        IMAGE_NAME     = "${ECR_REGISTRY}/interview-platform/${params.SERVICE_NAME}"
+    }
+
+    options {
+        timestamps()
+        buildDiscarder(logRotator(numToKeepStr: '20'))
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Maven Build') {
+            steps {
+                sh "mvn -pl ${params.SERVICE_NAME} -am -DskipTests clean package"
+            }
+        }
+
+        stage('Unit Tests') {
+            steps {
+                sh "mvn -pl ${params.SERVICE_NAME} -am test"
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: "${params.SERVICE_NAME}/target/surefire-reports/*.xml"
+                }
+            }
+        }
+
+        stage('SonarQube Analysis (SAST)') {
+            steps {
+                withSonarQubeEnv('sonarqube') {
+                    sh """
+                        mvn -pl ${params.SERVICE_NAME} sonar:sonar \
+                          -Dsonar.host.url=${SONAR_HOST_URL} \
+                          -Dsonar.projectKey=interview-platform-${params.SERVICE_NAME}
+                    """
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -t ${IMAGE_NAME}:${params.IMAGE_TAG} -f ${params.SERVICE_NAME}/Dockerfile ."
+            }
+        }
+
+        stage('Trivy Container Scan') {
+            steps {
+                sh """
+                    trivy image --exit-code 1 --severity HIGH,CRITICAL \
+                      --format table ${IMAGE_NAME}:${params.IMAGE_TAG}
+                """
+            }
+        }
+
+        stage('Push Artifact to Nexus') {
+            steps {
+                sh """
+                    mvn -pl ${params.SERVICE_NAME} deploy:deploy-file \
+                      -Durl=${NEXUS_URL} \
+                      -DrepositoryId=nexus \
+                      -Dfile=${params.SERVICE_NAME}/target/*.jar \
+                      -DgroupId=com.interview \
+                      -DartifactId=${params.SERVICE_NAME} \
+                      -Dversion=1.0.${params.IMAGE_TAG} \
+                      -Dpackaging=jar
+                """
+            }
+        }
+
+        stage('Push Image to AWS ECR') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-ecr-creds']]) {
+                    sh """
+                        aws ecr get-login-password --region us-east-1 | \
+                          docker login --username AWS --password-stdin ${ECR_REGISTRY}
+                        docker push ${IMAGE_NAME}:${params.IMAGE_TAG}
+                    """
+                }
+            }
+        }
+
+        stage('Update GitOps Repo (ArgoCD sync trigger)') {
+            steps {
+                sh """
+                    git clone https://github.com/your-org/interview-platform-gitops.git gitops-repo
+                    cd gitops-repo
+                    yq -i '.image.tag = "${params.IMAGE_TAG}"' helm/charts/${params.SERVICE_NAME}/values.yaml
+                    git commit -am "ci: bump ${params.SERVICE_NAME} to ${params.IMAGE_TAG}"
+                    git push origin main
+                """
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "${params.SERVICE_NAME}:${params.IMAGE_TAG} built, scanned and published. ArgoCD will auto-sync."
+        }
+        failure {
+            echo "Pipeline failed for ${params.SERVICE_NAME}. Check Sonar / Trivy / test reports."
+        }
+    }
+}

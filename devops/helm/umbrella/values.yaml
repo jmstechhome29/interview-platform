@@ -1,0 +1,22 @@
+# Root values file for the umbrella chart. Override only what differs per
+# environment (dev/staging/prod) — e.g. helm install -f values-prod.yaml.
+# Each key below matches a subchart name; Helm merges it into that subchart's
+# own values.yaml, so you only specify the delta here.
+
+user-service:
+  enabled: true
+
+resume-service:
+  enabled: true
+
+interview-service:
+  enabled: true
+
+feedback-service:
+  enabled: true
+
+api-gateway:
+  enabled: true
+
+frontend:
+  enabled: true
